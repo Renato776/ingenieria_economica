@@ -13,6 +13,33 @@ const Utility = {
        return {"average":Utility.average(useful),"min":Utility.min(useful),"max":Utility.max(useful),"outliers":filtered_data.outliers
        ,"lower_bound":filtered_data.lower_bound,"upper_bound":filtered_data.upper_bound};
    },
+numeric_solve:function(equation,a,b,exactitud = 0.00000000001){
+    let error = 100;
+    let f_a = equation(a);
+    let f_b = equation(b);
+    let x = (a+b)/2; //initial guess.
+    let f_x = equation(x);
+    while (!(f_x==0 || error<exactitud )){
+        if(Utility.sign_change(f_x,f_a)){
+            b = x;
+        }else{
+            a = x;
+        }
+        x = (a+b)/2;
+        f_x = equation(x);
+        f_b = equation(b);
+        f_a = equation(a);
+        error = Math.abs(f_b - f_a);
+    }
+    console.log('error: '+error);
+    console.log('result: '+x);
+    return x;
+},
+sign_change: function (a,b){
+    if(a<0 && b <0) return false;
+    if(a>0 && b>0) return false;
+    return true;
+},
     remove_outliers:function(array){
         let standard_deviation = Utility.standard_deviation(array);
         let mean = Utility.average(array);

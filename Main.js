@@ -51,26 +51,14 @@ async function load_plans(){
 
 async function calculate_plan(plan){
     let entry = {};
-    let abonos = {};
-    if(plan.abonos!=null){
-        for(let i = 0; i < plan.abonos.length; i++){
-            let abono = plan.abonos[i];
-            let a = abono[0]; //actual value.
-            for(let j = 1; j<abono.length; j++){
-                abonos[abono[j]] = a;
-            }
-        }
-    }
     let i = 1;
-    entry["details"] = plan.id;
-    if( 1 in abonos)entry["abono"] = abonos[1];
-    else entry["abono"] = 0;
     entry["mes"] = 1;
     entry["saldo_principal"] = plan.saldo_principal_inicial;
     entry["cuota"] = plan.cuota;
     entry["interes"] = entry.saldo_principal*plan.tasa_interes_efectiva;
     entry["capital"] = plan.cuota - entry.interes;
     entry["saldo"] = entry.saldo_principal - entry.capital;
+    entry["details"] = plan.id;
     await Postgres.insert(entry,"ie_data");
     while(entry.saldo>2){
         i++;
@@ -81,9 +69,8 @@ async function calculate_plan(plan){
         entry.mes = i;
         entry.interes = entry.saldo_principal*plan.tasa_interes_efectiva;
         entry.capital = entry.cuota - entry.interes;
-        if(i in abonos)entry.abono = abonos[i];
-        else entry.abono = 0;
-        entry.saldo = entry.saldo_principal - entry.capital - entry.abono;
+        entry.saldo = entry.saldo_principal - entry.capital;
+        entry.details = plan.id;
         await Postgres.insert(entry,'ie_data');
     }
 }
@@ -102,24 +89,31 @@ async function main() {
     //Alright, now let's move to the future each entry.
     const total_period = 8;
     let entries = await Postgres.select(null,data_table);
-    const interest = 14/100;
-    const ie = 1.5/100; //12 porciento de interes
+    let interest = 1.5/100;
+    const ie = 12/100; //12 porciento de interes
     let sum = 0;
-    //await load_constant_data(1000,12);
-    let sub_period = 3; //Trimestral
-    for (let i = 0; i<entries.length; i++){
-        let int = 0;
-        if(i!=0){
-            if((i+1)%sub_period==0){
-                let accumulated = 0;
-                for (let j = 0;  j<sub_period; j++){
-                    accumulated = entries[i-j];
-                }
-            }
-        }
-        await Postgres.update(data_table,['field4'],[int],'id = '+(i+1));
-        console.log(int);
+    interest = Math.pow(1+0.045/3,3)-1;
+    console.log(Math.pow(1+((4.57/100)/3)/(1/3),1/3)-1);
+    let plan = {};
+    plan["cuota"] = 600;
+    plan["saldo_principal_inicial"] = 2763.9;
+    plan["tasa_interes_efectiva"] = 16/100;
+    plan["id"] = 11;
+    await calculate_plan(plan);
+    return ;
+    for (let i = 0; i<24/3; i++){
+        let true_future = get_future(1000,interest,i);
+        let false_future = get_future(1000,4.5/100,i);
+        console.log('true: '+true_future+" false: "+false_future+" error: "+Math.abs(true_future-false_future));
     }
+
+    //await load_constant_data(1000,12);
+    for (let i = 0; i<entries.length; i++){
+        let f = get_future(entries[i].field1,interest,i);
+        await Postgres.update(data_table,['field2'],[f],'id = '+(i+1));
+        sum+= f;
+    }
+    console.log(sum);
 }
 
 main().then(()=>{
