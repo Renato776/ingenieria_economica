@@ -2,8 +2,7 @@ const Utility = require('./Utility').utility;
 const Postgres = require('./Postgres').postgres;
 const fs = require('fs');
 
-let ing_economica = false;
-
+const data_table = 'experiments';
 
 async function load_plans(){
     await Postgres.truncate('ie_details');
@@ -90,26 +89,10 @@ async function calculate_plan(plan){
 }
 
 async function main() {
-    if(ing_economica){
-        await load_plans();
-        const plans = await Postgres.select('id,saldo_principal_inicial,cuota,tasa_interes_efectiva,abonos', 'ie_details');
-        await Postgres.truncate('ie_data');
-        for(let i = 0; i<plans.length; i++){
-            let plan = plans[i];
-            await calculate_plan(plan);
-            let interes_total = await Postgres.sum('interes','ie_data','details = '+plan.id);
-            interes_total = interes_total[0].sum;
-            let pago_total = await Postgres.sum('cuota','ie_data','details = '+plan.id);
-            pago_total = pago_total[0].sum;
-            await Postgres.update('ie_details',["interes_total_pagado","total_pagado"],[
-                interes_total,pago_total],'id = '+plan.id);
-            let header = 'mes,saldo_principal,cuota,interes,capital,abono,saldo';
-            let q = '(select mes,saldo_principal,cuota,interes,capital,abono,saldo from ie_data where details = '+plan.id+')';
-            let q1 = '(select precio,saldo_principal_inicial,tasa_interes_efectiva,cuota,plazo,enganche,abonos,' +
-                'total_pagado,interes_total_pagado from ie_details where id = '+plan.id+')';
-            let header1 = 'precio,saldo_principal_inicial,tasa_interes_efectiva,cuota,plazo,enganche,abonos,' +
-                'total_pagado,interes_total_pagado ';
-        }
+    for (let n = 0; n<8; n++){
+        let entry = {};
+        entry["field1"] = 1000;
+        await Postgres.insert(entry,data_table);
     }
 }
 

@@ -103,6 +103,15 @@ PSQL_COMMANDS+=( "CREATE TABLE IF NOT EXISTS ie_details (
     total_pagado numeric(20,2),
     interes_total_pagado numeric(20,2)
 );" )
+
+PSQL_COMMANDS+=( "CREATE TABLE IF NOT EXISTS experiments (
+    id serial PRIMARY KEY,
+    field1 numeric(20,2),
+    field2 numeric(20,2),
+    field3 numeric(20,2),
+    field4 numeric(20,2),
+    field5 numeric(20,2)
+);" )
 PSQL_COMMANDS+=( "CREATE TABLE IF NOT EXISTS ie_data (
     details INT NOT NULL,
     mes INT NOT NULL,
