@@ -103,15 +103,19 @@ async function main() {
     const total_period = 8;
     let entries = await Postgres.select(null,data_table);
     const interest = 14/100;
-    const ie = 12/100; //12 porciento de interes
+    const ie = 1.5/100; //12 porciento de interes
     let sum = 0;
     //await load_constant_data(1000,12);
+    let sub_period = 3; //Trimestral
     for (let i = 0; i<entries.length; i++){
         let int = 0;
         if(i!=0){
-            let p = entries[i].field3;
-            let past = entries[i-1].field3;
-            int = (p-past)/past;
+            if((i+1)%sub_period==0){
+                let accumulated = 0;
+                for (let j = 0;  j<sub_period; j++){
+                    accumulated = entries[i-j];
+                }
+            }
         }
         await Postgres.update(data_table,['field4'],[int],'id = '+(i+1));
         console.log(int);
