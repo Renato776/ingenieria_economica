@@ -62,7 +62,9 @@ decode:function(response){
         return  res;
     },
     update:async function(table,fields,values,where){
-        const q = 'UPDATE '+table+' SET ('+Utility.to_list(fields)+') = ('+Utility.to_list(values)+') WHERE '+where;
+        let q;
+        if(fields.length>1)q =  'UPDATE '+table+' SET ('+Utility.to_list(fields)+') = ('+Utility.to_list(values)+') WHERE '+where;
+        else q =  'UPDATE '+table+' SET '+Utility.to_list(fields)+' = '+Utility.to_list(values)+' WHERE '+where;
         await Postgres.query(q);
     },
     frequency_distribution:async function(field,table,where = null){

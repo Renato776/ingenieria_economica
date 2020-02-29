@@ -87,12 +87,34 @@ async function calculate_plan(plan){
         await Postgres.insert(entry,'ie_data');
     }
 }
-
-async function main() {
-    for (let n = 0; n<8; n++){
+async function load_constant_data(amount,period){
+    for (let n = 0; n<period; n++){
         let entry = {};
-        entry["field1"] = 1000;
+        entry["field1"] = amount;
         await Postgres.insert(entry,data_table);
+    }
+}
+function get_future(present, interest, n){
+    return present * Math.pow(1+interest,n);
+}
+async function main() {
+//    await load_constant_data(1000,8);
+    //Alright, now let's move to the future each entry.
+    const total_period = 8;
+    let entries = await Postgres.select(null,data_table);
+    const interest = 14/100;
+    const ie = 12/100; //12 porciento de interes
+    let sum = 0;
+    //await load_constant_data(1000,12);
+    for (let i = 0; i<entries.length; i++){
+        let int = 0;
+        if(i!=0){
+            let p = entries[i].field3;
+            let past = entries[i-1].field3;
+            int = (p-past)/past;
+        }
+        await Postgres.update(data_table,['field4'],[int],'id = '+(i+1));
+        console.log(int);
     }
 }
 
