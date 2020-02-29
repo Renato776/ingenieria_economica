@@ -1,0 +1,17 @@
+ table_schema |       table_name       
+--------------+------------------------
+ public       | arqui_inventory
+ public       | aspirants
+ public       | careers
+ public       | departments
+ public       | frequency_distribution
+ public       | generations
+ public       | graphs
+ public       | ie_data
+ public       | ie_details
+ public       | new_students
+ public       | professionals
+ public       | statistics
+ public       | students
+(13 rows)
+

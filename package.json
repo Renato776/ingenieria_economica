@@ -1,0 +1,7 @@
+{
+  "name": "ing_economica",
+  "version": "1.0.0",
+  "dependencies": {
+    "pg": "^7.18.2"
+  }
+}
